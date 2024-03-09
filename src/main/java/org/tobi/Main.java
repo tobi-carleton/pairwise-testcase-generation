@@ -13,25 +13,16 @@ public class Main {
         List<IndexedValue> indexedValues = createIndexedValuesList(parameterList);
         int[][] requirementsArray = createRequirementsArray(indexedValues);
 
-        printRequirementsArray(requirementsArray);
-
         List<String[]> testSuite = createInitialTestSuite(parameterList);
-
-        printTestSuite(testSuite);
 
         fillInRequirementsArray(requirementsArray, testSuite, 2, indexedValues);
 
-        printRequirementsArray(requirementsArray);
-
         for (int i = 2; i < parameterList.size(); i++) {
             testSuite = horizontalExpansion(testSuite, requirementsArray, parameterList.get(i), i, indexedValues);
-            printTestSuite(testSuite);
-            printRequirementsArray(requirementsArray);
             verticalExpansion(testSuite, requirementsArray, parameterList.get(i), i, indexedValues, parameterList);
-            printTestSuite(testSuite);
             fillInRequirementsArray(requirementsArray, testSuite, i + 1, indexedValues);
-            printRequirementsArray(requirementsArray);
         }
+        printTestSuite(testSuite);
     }
 
     private static List<String[]> verticalExpansion(List<String[]> testSuite, int[][] requirementsArray, Parameter parameter, int parameterIndex, List<IndexedValue> indexedValues, List<Parameter> parameterList) {
@@ -108,7 +99,6 @@ public class Main {
 
             //Update requirements array
             fillInRequirementsArray(requirementsArray, updatedTestSuite, parameterIndex + 1, indexedValues);
-            printRequirementsArray(requirementsArray);
         }
 
         return updatedTestSuite;
@@ -150,7 +140,6 @@ public class Main {
             }
 
             int numberOfExercisedRequirements = missingReqs - missingReqsAfterAddingTest;
-            System.out.println("Number of exercised requirements with test " + Arrays.toString(cloneTest) + " is " + numberOfExercisedRequirements);
             if (numberOfExercisedRequirements > max) {
                 max = numberOfExercisedRequirements;
                 bestTest = cloneTest.clone();
@@ -210,6 +199,7 @@ public class Main {
     }
 
     private static void printTestSuite(List<String[]> testSuite) {
+        System.out.println("------- Test Suite -------");
         for (String[] row : testSuite) {
             System.out.println(Arrays.toString(row));
         }
