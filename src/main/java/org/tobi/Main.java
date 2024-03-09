@@ -3,8 +3,11 @@ package org.tobi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Main {
+    private static final String DONT_CARE = "DC";
     public static void main(String[] args) {
         List<Parameter> parameterList = getParameterList();
         List<IndexedValue> indexedValues = createIndexedValuesList(parameterList);
@@ -20,9 +23,80 @@ public class Main {
 
         printRequirementsArray(requirementsArray);
 
-        testSuite = horizontalExpansion(testSuite, requirementsArray, parameterList.get(2), 2, indexedValues);
-        printTestSuite(testSuite);
-        printRequirementsArray(requirementsArray);
+        for (int i = 2; i < parameterList.size(); i++) {
+            testSuite = horizontalExpansion(testSuite, requirementsArray, parameterList.get(i), i, indexedValues);
+            printTestSuite(testSuite);
+            printRequirementsArray(requirementsArray);
+            verticalExpansion(testSuite, requirementsArray, parameterList.get(i), i, indexedValues, parameterList);
+            printTestSuite(testSuite);
+            fillInRequirementsArray(requirementsArray, testSuite, i + 1, indexedValues);
+            printRequirementsArray(requirementsArray);
+        }
+    }
+
+    private static List<String[]> verticalExpansion(List<String[]> testSuite, int[][] requirementsArray, Parameter parameter, int parameterIndex, List<IndexedValue> indexedValues, List<Parameter> parameterList) {
+        // Get parameter values
+        List<String> values = parameter.getValues();
+        for (String parameterValue : values) {
+            // Determine uncovered requirements
+            int paramValueIndex = getIndexFromParameterValue(indexedValues, parameterValue);
+            int[] requirementsForParamValue = requirementsArray[paramValueIndex];
+            List<IndexedValue[]> missingRequirements = new ArrayList<>();
+            for (int i = 0; i < requirementsForParamValue.length; i++) {
+                if (requirementsForParamValue[i] == 0) {
+                    IndexedValue[] missingReq = new IndexedValue[2];
+                    // Always add parameter being expanded in index 0
+                    missingReq[0] = getIndexedValueFromParameterValue(indexedValues, parameterValue);
+                    missingReq[1] = getIndexedValueFromIndex(indexedValues, i);
+                    missingRequirements.add(missingReq);
+                }
+            }
+
+            for (IndexedValue[] missingReq : missingRequirements) {
+                boolean updatedExistingTest = false;
+                for (String[] test : testSuite) {
+                    if (existingTestCanCoverRequirement(test, missingReq)) {
+                        // update existing test - replace DON'T CARE value
+                        int otherParameterIndex = missingReq[1].getParameterIndex();
+                        test[otherParameterIndex] = missingReq[1].getValue();
+                        updatedExistingTest = true;
+                        break;
+                    }
+                }
+                if (!updatedExistingTest) {
+                    // No suitable existing test found - add a new test case
+                    String[] test = new String[parameterList.size()];
+                    int parameterBeingExpandedIndex = missingReq[0].getParameterIndex();
+                    String parameterBeingExpandedValue = missingReq[0].getValue();
+                    int otherParameterIndex = missingReq[1].getParameterIndex();
+                    String otherParameterValue = missingReq[1].getValue();
+
+                    test[parameterBeingExpandedIndex] = parameterBeingExpandedValue;
+                    test[otherParameterIndex] = otherParameterValue;
+                    fillNullValuesWithDontCare(test);
+                    testSuite.add(test);
+                }
+            }
+        }
+        return testSuite;
+    }
+
+    private static void fillNullValuesWithDontCare(String[] test) {
+        for (int i = 0; i < test.length; i++) {
+            if (Objects.isNull(test[i])) {
+                test[i] = DONT_CARE;
+            }
+        }
+    }
+
+    private static boolean existingTestCanCoverRequirement(String[] existingTest, IndexedValue[] requirement) {
+        int parameterBeingExpandedIndex = requirement[0].getParameterIndex();
+        String parameterBeingExpandedValue = requirement[0].getValue();
+        int otherParameterIndex = requirement[1].getParameterIndex();
+
+        // If existing test contains the parameter being expanded value, and the other parameter is marked as don't care
+        // We can update existing test case without affecting its existing requirement coverage
+        return existingTest[parameterBeingExpandedIndex].equalsIgnoreCase(parameterBeingExpandedValue) && existingTest[otherParameterIndex].equalsIgnoreCase(DONT_CARE);
     }
 
     private static List<String[]> horizontalExpansion(List<String[]> testSuite, int[][] requirementsArray, Parameter parameter, int parameterIndex, List<IndexedValue> indexedValues) {
@@ -102,14 +176,15 @@ public class Main {
     private static List<IndexedValue> createIndexedValuesList(List<Parameter> parameterList) {
         List<IndexedValue> indexedValuesList = new ArrayList<>();
         int index = 0;
+        int parameterIndex = 0;
         for (Parameter parameter : parameterList) {
             String parameterName = parameter.getName();
             for (String value : parameter.getValues()) {
-                IndexedValue indexedValue = new IndexedValue(index, parameterName, value);
+                IndexedValue indexedValue = new IndexedValue(index, parameterIndex, parameterName, value);
                 indexedValuesList.add(indexedValue);
                 index++;
             }
-
+            parameterIndex++;
         }
         return indexedValuesList;
     }
@@ -169,6 +244,7 @@ public class Main {
             }
         }
 
+        coveredRequirements = coveredRequirements.stream().filter(coveredReq -> !(coveredReq[0].equalsIgnoreCase(DONT_CARE) || coveredReq[1].equalsIgnoreCase(DONT_CARE))).collect(Collectors.toList());
         for (String[] coveredRequirement : coveredRequirements) {
             int firstParamIndex = getIndexFromParameterValue(indexedValues, coveredRequirement[0]);
             int secondParamIndex = getIndexFromParameterValue(indexedValues, coveredRequirement[1]);
@@ -192,6 +268,20 @@ public class Main {
                 .findFirst()
                 .orElseThrow(NullPointerException::new);
         return filteredIndexValue.getValue();
+    }
+
+    private static IndexedValue getIndexedValueFromParameterValue(List<IndexedValue> indexedValues, String parameterValue) {
+        return indexedValues.stream()
+                .filter(indexedValue -> indexedValue.getValue().equals(parameterValue))
+                .findFirst()
+                .orElseThrow(NullPointerException::new);
+    }
+
+    private static IndexedValue getIndexedValueFromIndex(List<IndexedValue> indexedValues, int parameterIndex) {
+        return indexedValues.stream()
+                .filter(indexedValue -> indexedValue.getIndex() == parameterIndex)
+                .findFirst()
+                .orElseThrow(NullPointerException::new);
     }
 
     private static int[][] copyIntArray(int[][] arrayToCopy) {
