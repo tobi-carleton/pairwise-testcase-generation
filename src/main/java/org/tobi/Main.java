@@ -12,13 +12,80 @@ public class Main {
 
         printRequirementsArray(requirementsArray);
 
-        List<String[]> initialTestSuite = createInitialTestSuite(parameterList);
+        List<String[]> testSuite = createInitialTestSuite(parameterList);
 
-        printTestSuite(initialTestSuite);
+        printTestSuite(testSuite);
 
-        fillInRequirementsArray(requirementsArray, initialTestSuite, 2, indexedValues);
+        fillInRequirementsArray(requirementsArray, testSuite, 2, indexedValues);
 
         printRequirementsArray(requirementsArray);
+
+        testSuite = horizontalExpansion(testSuite, requirementsArray, parameterList.get(2), 2, indexedValues);
+        printTestSuite(testSuite);
+        printRequirementsArray(requirementsArray);
+    }
+
+    private static List<String[]> horizontalExpansion(List<String[]> testSuite, int[][] requirementsArray, Parameter parameter, int parameterIndex, List<IndexedValue> indexedValues) {
+        // Get parameter values
+        List<String> parameterValues = parameter.getValues();
+        List<String[]> updatedTestSuite = new ArrayList<>();
+        for (String[] test : testSuite) {
+            updatedTestSuite.add(getBestCoverageTest(test, parameterValues, parameterIndex, requirementsArray, indexedValues));
+
+            //Update requirements array
+            //fillInRequirementsArray(requirementsArray, updatedTestSuite, parameterIndex + 1, indexedValues);
+        }
+
+        return updatedTestSuite;
+    }
+
+    private static String[] getBestCoverageTest(String[] test, List<String> parameterValues, int testCaseIndex, int[][] requirementsArray, List<IndexedValue> indexedValues) {
+        String[] bestTest = new String[0];
+        int max = Integer.MIN_VALUE;
+        for (String parameterValue : parameterValues) {
+            // Create test with new parameter added
+            String[] cloneTest = test.clone();
+            cloneTest[testCaseIndex] = parameterValue;
+
+            List<String[]> singleTest = new ArrayList<>();
+            singleTest.add(cloneTest);
+
+            int[][] reqArrayClone = requirementsArray.clone();
+
+            // Get Index of new parameter
+            int parameterIndex = getIndexFromParameterValue(indexedValues, parameterValue);
+
+            // Get missing requirements for this parameter
+            int missingReqs = 0;
+            int[] paramRequirements = reqArrayClone[parameterIndex];
+            for (int i = 0; i < indexedValues.size(); i++) {
+                if (paramRequirements[i] == 0) {
+                    missingReqs++;
+                }
+            }
+
+            fillInRequirementsArray(reqArrayClone, singleTest, testCaseIndex + 1, indexedValues);
+            System.out.println("Requirements Array with clone test " + Arrays.toString(cloneTest));
+            printRequirementsArray(reqArrayClone);
+            System.out.println("Original Requirements Array");
+            printRequirementsArray(requirementsArray);
+
+            int missingReqsAfterAddingTest = 0;
+            paramRequirements = reqArrayClone[parameterIndex];
+            for (int i = 0; i < indexedValues.size(); i++) {
+                if (paramRequirements[i] == 0) {
+                    missingReqsAfterAddingTest++;
+                }
+            }
+
+            int numberOfExercisedRequirements = missingReqs - missingReqsAfterAddingTest;
+            System.out.println("Number of exercised requirements with test " + Arrays.toString(cloneTest) + " is " + numberOfExercisedRequirements);
+            if (numberOfExercisedRequirements > max) {
+                max = numberOfExercisedRequirements;
+                bestTest = cloneTest.clone();
+            }
+        }
+        return bestTest;
     }
 
     private static List<Parameter> getParameterList() {
@@ -50,12 +117,12 @@ public class Main {
         return indexedValuesList;
     }
 
-    private static int[][] createRequirementsArray(List<IndexedValue> indexedValueList) {
-        int[][] requirementsArray = new int[indexedValueList.size()][indexedValueList.size()];
+    private static int[][] createRequirementsArray(List<IndexedValue> indexedValues) {
+        int[][] requirementsArray = new int[indexedValues.size()][indexedValues.size()];
         // Create requirements array row
-        for (IndexedValue rowIndexedValue : indexedValueList) {
+        for (IndexedValue rowIndexedValue : indexedValues) {
             // Create requirements array column
-            for (IndexedValue columnIndexedValue : indexedValueList) {
+            for (IndexedValue columnIndexedValue : indexedValues) {
                 if (rowIndexedValue.getParameter().equals(columnIndexedValue.getParameter())) {
                     requirementsArray[rowIndexedValue.getIndex()][columnIndexedValue.getIndex()] = 1;
                 }
@@ -120,5 +187,13 @@ public class Main {
                 .findFirst()
                 .orElseThrow(NullPointerException::new);
         return filteredIndexValue.getIndex();
+    }
+
+    private static String getParameterValueFromIndex(List<IndexedValue> indexedValues, int parameterIndex) {
+        IndexedValue filteredIndexValue = indexedValues.stream()
+                .filter(indexedValue -> indexedValue.getIndex() == parameterIndex)
+                .findFirst()
+                .orElseThrow(NullPointerException::new);
+        return filteredIndexValue.getValue();
     }
 }
