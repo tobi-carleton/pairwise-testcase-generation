@@ -33,7 +33,8 @@ public class Main {
             updatedTestSuite.add(getBestCoverageTest(test, parameterValues, parameterIndex, requirementsArray, indexedValues));
 
             //Update requirements array
-            //fillInRequirementsArray(requirementsArray, updatedTestSuite, parameterIndex + 1, indexedValues);
+            fillInRequirementsArray(requirementsArray, updatedTestSuite, parameterIndex + 1, indexedValues);
+            printRequirementsArray(requirementsArray);
         }
 
         return updatedTestSuite;
@@ -50,7 +51,7 @@ public class Main {
             List<String[]> singleTest = new ArrayList<>();
             singleTest.add(cloneTest);
 
-            int[][] reqArrayClone = requirementsArray.clone();
+            int[][] reqArrayClone = copyIntArray(requirementsArray);
 
             // Get Index of new parameter
             int parameterIndex = getIndexFromParameterValue(indexedValues, parameterValue);
@@ -65,10 +66,6 @@ public class Main {
             }
 
             fillInRequirementsArray(reqArrayClone, singleTest, testCaseIndex + 1, indexedValues);
-            System.out.println("Requirements Array with clone test " + Arrays.toString(cloneTest));
-            printRequirementsArray(reqArrayClone);
-            System.out.println("Original Requirements Array");
-            printRequirementsArray(requirementsArray);
 
             int missingReqsAfterAddingTest = 0;
             paramRequirements = reqArrayClone[parameterIndex];
@@ -195,5 +192,18 @@ public class Main {
                 .findFirst()
                 .orElseThrow(NullPointerException::new);
         return filteredIndexValue.getValue();
+    }
+
+    private static int[][] copyIntArray(int[][] arrayToCopy) {
+        int noOfRows = arrayToCopy.length;
+        int noOfColumns = arrayToCopy[0].length;
+
+        int[][] copy = new int[noOfRows][noOfColumns];
+
+        for (int i = 0; i < noOfRows; i++) {
+            System.arraycopy(arrayToCopy[i], 0, copy[i], 0, noOfColumns);
+        }
+
+        return copy;
     }
 }
