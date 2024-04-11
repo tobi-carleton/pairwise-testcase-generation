@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 public class Main {
     private static final String DONT_CARE = "DC";
     public static void main(String[] args) {
+        long startTime = System.currentTimeMillis();
         List<Parameter> parameterList = getParameterList();
         List<IndexedValue> indexedValues = createIndexedValuesList(parameterList);
         int[][] requirementsArray = createRequirementsArray(indexedValues);
@@ -23,6 +24,8 @@ public class Main {
             fillInRequirementsArray(requirementsArray, testSuite, i + 1, indexedValues);
         }
         printTestSuite(testSuite);
+        System.out.println((System.currentTimeMillis() - startTime) / 1000.0);
+        System.out.println(testSuite.size());
     }
 
     private static List<String[]> verticalExpansion(List<String[]> testSuite, int[][] requirementsArray, Parameter parameter, int parameterIndex, List<IndexedValue> indexedValues, List<Parameter> parameterList) {
@@ -87,7 +90,12 @@ public class Main {
 
         // If existing test contains the parameter being expanded value, and the other parameter is marked as don't care
         // We can update existing test case without affecting its existing requirement coverage
-        return existingTest[parameterBeingExpandedIndex].equalsIgnoreCase(parameterBeingExpandedValue) && existingTest[otherParameterIndex].equalsIgnoreCase(DONT_CARE);
+        try{
+            return existingTest[parameterBeingExpandedIndex].equalsIgnoreCase(parameterBeingExpandedValue) && existingTest[otherParameterIndex].equalsIgnoreCase(DONT_CARE);
+        } catch (NullPointerException e) {
+            return false;
+        }
+
     }
 
     private static List<String[]> horizontalExpansion(List<String[]> testSuite, int[][] requirementsArray, Parameter parameter, int parameterIndex, List<IndexedValue> indexedValues) {
@@ -151,13 +159,68 @@ public class Main {
     private static List<Parameter> getParameterList() {
         List<Parameter> parameterList = new ArrayList<>();
 
-        Parameter x = new Parameter("x", List.of("x1", "x2", "x3"));
-        Parameter y = new Parameter("y", List.of("y1", "y2"));
-        Parameter z = new Parameter("z", List.of("z1", "z2", "z3", "z4"));
+        Parameter noise_Y = new Parameter("noise_Y", List.of("0.0", "1.67", "3.33", "5.0"));
+        parameterList.add(noise_Y);
 
-        parameterList.add(x);
-        parameterList.add(y);
-        parameterList.add(z);
+        Parameter two_pass = new Parameter("two_pass", List.of("true", "false"));
+        parameterList.add(two_pass);
+
+        Parameter is_track_side_at_left = new Parameter("is_track_side_at_left", List.of("true", "false"));
+        parameterList.add(is_track_side_at_left);
+
+        Parameter noise_X = new Parameter("noise_X", List.of("0.0", "1.67", "3.33", "5.0"));
+        parameterList.add(noise_X);
+
+
+        Parameter length = new Parameter("length", List.of("10.0", "40.0", "70.0", "100.0"));
+        parameterList.add(length);
+
+        Parameter vegetable = new Parameter("vegetable", List.of("cabbage", "leek"));
+        parameterList.add(vegetable);
+
+        Parameter grass_density = new Parameter("grass_density", List.of("0", "1", "2", "3", "4", "5"));
+        parameterList.add(grass_density);
+
+        Parameter is_first_uturn_right_side = new Parameter("is_first_uturn_right_side", List.of("true", "false"));
+        parameterList.add(is_first_uturn_right_side);
+
+        Parameter roughness = new Parameter("roughness", List.of("0.0", "0.33", "0.67", "1.0"));
+        parameterList.add(roughness);
+
+        Parameter final_track_outer = new Parameter("final_track_outer", List.of("true", "false"));
+        parameterList.add(final_track_outer);
+
+        Parameter weed_area = new Parameter("weed_area", List.of("2.0", "35.0", "68.0", "101.0"));
+        parameterList.add(weed_area);
+
+        Parameter gap = new Parameter("gap", List.of("55", "91", "127", "163", "165"));
+        parameterList.add(gap);
+
+        Parameter is_first_track_outer = new Parameter("is_first_track_outer", List.of("true", "false"));
+        parameterList.add(is_first_track_outer);
+
+        Parameter vegetable_density = new Parameter("vegetable_density", List.of("1", "2", "3", "4", "5"));
+        parameterList.add(vegetable_density);
+
+        Parameter persistence = new Parameter("persistence", List.of("0.0", "0.23", "0.47", "0.7"));
+        parameterList.add(persistence);
+
+        Parameter inner_track_width = new Parameter("inner_track_width", List.of("0", "33", "66", "99"));
+        parameterList.add(inner_track_width);
+
+        Parameter row = new Parameter("row", List.of("1.0", "34.0", "67.0", "100.0"));
+        parameterList.add(row);
+
+        Parameter disappearance_probability = new Parameter("disappearance_probability", List.of("0.0", "10.0", "20.0", "30.0"));
+        parameterList.add(disappearance_probability);
+
+//        Parameter x = new Parameter("x", List.of("x1", "x2", "x3"));
+//        Parameter y = new Parameter("y", List.of("y1", "y2"));
+//        Parameter z = new Parameter("z", List.of("z1", "z2", "z3", "z4"));
+//
+//        parameterList.add(x);
+//        parameterList.add(y);
+//        parameterList.add(z);
 
         return parameterList;
     }
