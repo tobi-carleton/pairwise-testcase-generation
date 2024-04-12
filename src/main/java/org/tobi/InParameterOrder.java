@@ -30,14 +30,14 @@ public class InParameterOrder extends PairWiseTestBase {
         List<String> values = parameter.getValues();
         for (String parameterValue : values) {
             // Determine uncovered requirements
-            int paramValueIndex = getIndexFromParameterValue(indexedValues, parameterValue);
+            int paramValueIndex = getIndexFromParameterValue(indexedValues, parameterValue, parameterIndex);
             int[] requirementsForParamValue = requirementsArray[paramValueIndex];
             List<IndexedValue[]> missingRequirements = new ArrayList<>();
             for (int i = 0; i < requirementsForParamValue.length; i++) {
                 if (requirementsForParamValue[i] == 0) {
                     IndexedValue[] missingReq = new IndexedValue[2];
                     // Always add parameter being expanded in index 0
-                    missingReq[0] = getIndexedValueFromParameterValue(indexedValues, parameterValue);
+                    missingReq[0] = getIndexedValueFromParameterValue(indexedValues, parameterValue, parameterIndex);
                     missingReq[1] = getIndexedValueFromIndex(indexedValues, i);
                     missingRequirements.add(missingReq);
                 }
@@ -109,13 +109,13 @@ public class InParameterOrder extends PairWiseTestBase {
         return updatedTestSuite;
     }
 
-    private static String[] getBestCoverageTest(String[] test, List<String> parameterValues, int testCaseIndex, int[][] requirementsArray, List<IndexedValue> indexedValues) {
+    private static String[] getBestCoverageTest(String[] test, List<String> parameterValues, int parameterIndex, int[][] requirementsArray, List<IndexedValue> indexedValues) {
         String[] bestTest = new String[0];
         int max = Integer.MIN_VALUE;
         for (String parameterValue : parameterValues) {
             // Create test with new parameter added
             String[] cloneTest = test.clone();
-            cloneTest[testCaseIndex] = parameterValue;
+            cloneTest[parameterIndex] = parameterValue;
 
             List<String[]> singleTest = new ArrayList<>();
             singleTest.add(cloneTest);
@@ -123,21 +123,21 @@ public class InParameterOrder extends PairWiseTestBase {
             int[][] reqArrayClone = copyIntArray(requirementsArray);
 
             // Get Index of new parameter
-            int parameterIndex = getIndexFromParameterValue(indexedValues, parameterValue);
+            int parameterValueIndex = getIndexFromParameterValue(indexedValues, parameterValue, parameterIndex);
 
             // Get missing requirements for this parameter
             int missingReqs = 0;
-            int[] paramRequirements = reqArrayClone[parameterIndex];
+            int[] paramRequirements = reqArrayClone[parameterValueIndex];
             for (int i = 0; i < indexedValues.size(); i++) {
                 if (paramRequirements[i] == 0) {
                     missingReqs++;
                 }
             }
 
-            fillInRequirementsArray(reqArrayClone, singleTest, testCaseIndex + 1, indexedValues);
+            fillInRequirementsArray(reqArrayClone, singleTest, parameterIndex + 1, indexedValues);
 
             int missingReqsAfterAddingTest = 0;
-            paramRequirements = reqArrayClone[parameterIndex];
+            paramRequirements = reqArrayClone[parameterValueIndex];
             for (int i = 0; i < indexedValues.size(); i++) {
                 if (paramRequirements[i] == 0) {
                     missingReqsAfterAddingTest++;

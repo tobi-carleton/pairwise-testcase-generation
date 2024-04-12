@@ -21,8 +21,8 @@ public class RandomGreedyAlgorithm extends PairWiseTestBase {
         // Will be used for plotting incremental increase of pairwise coverage later on
         List<Integer> numOfCoveredReqs = new ArrayList<>();
 
-        int kTrials = 10;
-        while (numOfIterations < 10000 && numberOfCoveredRequirements < totalNumberOfPairRequirements) {
+        int kTrials = 3;
+        while (numOfIterations < 1000 && numberOfCoveredRequirements < totalNumberOfPairRequirements) {
             List<String[]> kRandomTestCases = createKRandomTestCases(parameterList, parameterListSize, kTrials);
             TestAndNumOfCoveredReq highestCoverageTest = getHighestCoverageTest(kRandomTestCases, parameterListSize, requirementsArray, indexedValues);
 
@@ -82,18 +82,24 @@ public class RandomGreedyAlgorithm extends PairWiseTestBase {
     private static int numberOfNewlyCoveredRequirements(int[][] requirementsArray, String[] test, int noOfParameters, List<IndexedValue> indexedValues) {
         int numOfNewlyCoveredRequirements = 0;
         List<String[]> coveredRequirements = new ArrayList<>();
+        List<int[]> parameterIndexes = new ArrayList<>();
         for (int i = 0; i < noOfParameters - 1; i++) {
             for (int j = i + 1; j < noOfParameters; j++) {
                 String[] pairRequirement = new String[2];
+                int[] parameterIndex = new int[2];
                 pairRequirement[0] = test[i];
                 pairRequirement[1] = test[j];
+                parameterIndex[0] = i;
+                parameterIndex[1] = j;
                 coveredRequirements.add(pairRequirement);
+                parameterIndexes.add(parameterIndex);
             }
         }
 
-        for (String[] coveredRequirement : coveredRequirements) {
-            int firstParamIndex = getIndexFromParameterValue(indexedValues, coveredRequirement[0]);
-            int secondParamIndex = getIndexFromParameterValue(indexedValues, coveredRequirement[1]);
+        int coveredRequirementsSize = coveredRequirements.size();
+        for (int i = 0; i < coveredRequirementsSize; i++) {
+            int firstParamIndex = getIndexFromParameterValue(indexedValues, coveredRequirements.get(i)[0], parameterIndexes.get(i)[0]);
+            int secondParamIndex = getIndexFromParameterValue(indexedValues, coveredRequirements.get(i)[1], parameterIndexes.get(i)[1]);
 
             if (requirementsArray[firstParamIndex][secondParamIndex] == 0 && requirementsArray[secondParamIndex][firstParamIndex] == 0) {
                 numOfNewlyCoveredRequirements++;
