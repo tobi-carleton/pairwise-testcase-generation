@@ -127,6 +127,7 @@ public class PairWiseTestBase {
     }
 
     protected static void printRequirementsArray(int[][] requirementsArray) {
+        System.out.println("------- Requirements Array -------");
         for (int[] row : requirementsArray) {
             System.out.println(Arrays.toString(row));
         }
