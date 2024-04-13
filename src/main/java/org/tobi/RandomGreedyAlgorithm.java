@@ -24,7 +24,8 @@ public class RandomGreedyAlgorithm extends PairWiseTestBase {
         List<Double> cumulativeNumOfCoveredReq = new ArrayList<>();
 
         int kTrials = 3;
-        while (numOfIterations < 1000 && numberOfCoveredRequirements < totalNumberOfPairRequirements) {
+        int maxNumOfIterations = 1000;
+        while (numOfIterations < maxNumOfIterations && numberOfCoveredRequirements < totalNumberOfPairRequirements) {
             List<String[]> kRandomTestCases = createKRandomTestCases(parameterList, parameterListSize, kTrials);
             TestAndNumOfCoveredReq highestCoverageTest = getHighestCoverageTest(kRandomTestCases, parameterListSize, requirementsArray, indexedValues);
 
@@ -39,12 +40,17 @@ public class RandomGreedyAlgorithm extends PairWiseTestBase {
             numOfIterations++;
         }
         printTestSuite(testSuite);
-        System.out.println((System.currentTimeMillis() - startTime) / 1000.0);
-        System.out.println("Number of iterations = " + numOfIterations);
-        System.out.println("Percentage of covered requirements = " + ((double) numberOfCoveredRequirements / totalNumberOfPairRequirements) * 100 + "%");
+        Runtime runtime = Runtime.getRuntime();
+        runtime.gc();
+        // Calculate the used memory
+        long memory = runtime.totalMemory() - runtime.freeMemory();
+        System.out.println("Used memory is bytes: " + memory);
+        System.out.println("Total Time Elapsed: " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
         System.out.println("Test Suite Size = " + testSuite.size());
+        System.out.println("Number of iterations taken is " + numOfIterations + " out of maximum allowed of " + maxNumOfIterations);
+        System.out.println("Percentage of covered requirements = " + ((double) numberOfCoveredRequirements / totalNumberOfPairRequirements) * 100 + "%");
         List<Integer> xValues = IntStream.range(1, testSuite.size() + 1).boxed().collect(Collectors.toList());
-        LineChart.createIDLineChart("Covered Requirements vs. Test Suite Size", "Random Greedy - 3 Trials", xValues, cumulativeNumOfCoveredReq, "Test Suite Size", "Number of covered pair requirements");
+        LineChart.createIDLineChart("Covered Requirements vs. Test Suite Size", "Random Greedy - " + kTrials + " Trials", xValues, cumulativeNumOfCoveredReq, "Test Suite Size", "Number of covered pair requirements");
     }
 
     private static List<String[]> createKRandomTestCases(List<Parameter> parameterList, int parameterListSize, int kTrials) {

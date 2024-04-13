@@ -26,35 +26,44 @@ public class InParameterOrder extends PairWiseTestBase {
 
         fillInRequirementsArray(requirementsArray, testSuite, 2, indexedValues);
 
-        for (int i = 2; i < parameterList.size(); i++) {
-            numberOfCoveredRequirements = horizontalExpansion(testSuite, requirementsArray, parameterList.get(i), i, indexedValues, cumulativeNumOfCoveredReq, numberOfCoveredRequirements, totalNumberOfPairRequirements);
-            numberOfCoveredRequirements = verticalExpansion(testSuite, requirementsArray, parameterList.get(i), i, indexedValues, parameterList, cumulativeNumOfCoveredReq, numberOfCoveredRequirements, totalNumberOfPairRequirements);
+        int parameterListSize = parameterList.size();
+        for (int i = 2; i < parameterListSize; i++) {
+            numberOfCoveredRequirements = horizontalExpansion(testSuite, requirementsArray, parameterList.get(i), i, i + 1,  indexedValues, cumulativeNumOfCoveredReq, numberOfCoveredRequirements, totalNumberOfPairRequirements);
+            numberOfCoveredRequirements = verticalExpansion(testSuite, requirementsArray, parameterList.get(i), i, i + 1, indexedValues, parameterList, cumulativeNumOfCoveredReq, numberOfCoveredRequirements, totalNumberOfPairRequirements);
         }
         printTestSuite(testSuite);
-        System.out.println((System.currentTimeMillis() - startTime) / 1000.0);
-        System.out.println(testSuite.size());
-        printRequirementsArray(requirementsArray);
+        Runtime runtime = Runtime.getRuntime();
+        runtime.gc();
+        // Calculate the used memory
+        long memory = runtime.totalMemory() - runtime.freeMemory();
+        System.out.println("Used memory is bytes: " + memory);
+        System.out.println("Total Time Elapsed: " + (System.currentTimeMillis() - startTime) / 1000.0 + " seconds");
+        System.out.println("Test Suite Size: " + testSuite.size());
+        System.out.println("Number of horizontal/vertical expansion steps = " + cumulativeNumOfCoveredReq.size());
+        System.out.println("Percentage of covered requirements = " + ((double) numberOfCoveredRequirements / totalNumberOfPairRequirements) * 100 + "%");
         List<Integer> xValues = IntStream.range(1, cumulativeNumOfCoveredReq.size() + 1).boxed().collect(Collectors.toList());
         LineChart.createIDLineChart("Covered Requirements vs. Number of horizontal/vertical expansion steps", "In Parameter Order", xValues, cumulativeNumOfCoveredReq, "Horizontal/Vertical Expansion Steps", "Number of covered pair requirements");
     }
 
-    private static List<Integer> getNewRequirementCoverageOfTest(List<String[]> kTests, int parameterListSize, int[][] requirementsArray, List<IndexedValue> indexedValues) {
+    private static List<Integer> getNewRequirementCoverageOfTest(List<String[]> kTests, int numParamsToExpand, int[][] requirementsArray, List<IndexedValue> indexedValues) {
         List<Integer> coveredReqs = new ArrayList<>();
         for (String[] test : kTests) {
-            coveredReqs.add(numberOfNewlyCoveredRequirements(requirementsArray, test, parameterListSize, indexedValues));
+            coveredReqs.add(numberOfNewlyCoveredRequirements(requirementsArray, test, numParamsToExpand, indexedValues));
         }
         return coveredReqs;
     }
 
-    private static int verticalExpansion(List<String[]> testSuite, int[][] requirementsArray, Parameter parameter, int parameterIndex, List<IndexedValue> indexedValues, List<Parameter> parameterList, List<Double> cumulativeNumOfCoveredReq, int numberOfCoveredRequirements, int totalNumberOfPairRequirements) {
+    private static int verticalExpansion(List<String[]> testSuite, int[][] requirementsArray, Parameter parameter, int parameterIndex, int numParamsToExpand, List<IndexedValue> indexedValues, List<Parameter> parameterList, List<Double> cumulativeNumOfCoveredReq, int numberOfCoveredRequirements, int totalNumberOfPairRequirements) {
         // Get parameter values
         List<String> values = parameter.getValues();
+        int numOfParameterValues = parameter.getValues().size();
+        int lastParameterValueIndex = getIndexFromParameterValue(indexedValues, values.get(numOfParameterValues - 1), parameterIndex);
         for (String parameterValue : values) {
             // Determine uncovered requirements
             int paramValueIndex = getIndexFromParameterValue(indexedValues, parameterValue, parameterIndex);
             int[] requirementsForParamValue = requirementsArray[paramValueIndex];
             List<IndexedValue[]> missingRequirements = new ArrayList<>();
-            for (int i = 0; i < requirementsForParamValue.length; i++) {
+            for (int i = 0; i < lastParameterValueIndex + 1; i++) {
                 if (requirementsForParamValue[i] == 0) {
                     IndexedValue[] missingReq = new IndexedValue[2];
                     // Always add parameter being expanded in index 0
@@ -71,9 +80,9 @@ public class InParameterOrder extends PairWiseTestBase {
                         // update existing test - replace DON'T CARE value
                         int otherParameterIndex = missingReq[1].getParameterIndex();
                         test[otherParameterIndex] = missingReq[1].getValue();
-                        numberOfCoveredRequirements += getNewRequirementCoverageOfTest(Collections.singletonList(test), parameterIndex + 1, requirementsArray, indexedValues).stream().mapToInt(Integer::intValue).sum();
+                        numberOfCoveredRequirements += getNewRequirementCoverageOfTest(Collections.singletonList(test), numParamsToExpand, requirementsArray, indexedValues).stream().mapToInt(Integer::intValue).sum();
                         cumulativeNumOfCoveredReq.add((double)  numberOfCoveredRequirements / totalNumberOfPairRequirements);
-                        fillInRequirementsArray(requirementsArray, Collections.singletonList(test), parameterIndex + 1, indexedValues);
+                        fillInRequirementsArray(requirementsArray, Collections.singletonList(test), numParamsToExpand, indexedValues);
                         updatedExistingTest = true;
                         break;
                     }
@@ -89,9 +98,9 @@ public class InParameterOrder extends PairWiseTestBase {
                     test[parameterBeingExpandedIndex] = parameterBeingExpandedValue;
                     test[otherParameterIndex] = otherParameterValue;
                     fillNullValuesWithDontCare(test);
-                    numberOfCoveredRequirements += getNewRequirementCoverageOfTest(Collections.singletonList(test), parameterIndex + 1, requirementsArray, indexedValues).stream().mapToInt(Integer::intValue).sum();
+                    numberOfCoveredRequirements += getNewRequirementCoverageOfTest(Collections.singletonList(test), numParamsToExpand, requirementsArray, indexedValues).stream().mapToInt(Integer::intValue).sum();
                     cumulativeNumOfCoveredReq.add((double)  numberOfCoveredRequirements / totalNumberOfPairRequirements);
-                    fillInRequirementsArray(requirementsArray, Collections.singletonList(test), parameterIndex + 1, indexedValues);
+                    fillInRequirementsArray(requirementsArray, Collections.singletonList(test), numParamsToExpand, indexedValues);
                     testSuite.add(test);
                 }
             }
@@ -122,23 +131,23 @@ public class InParameterOrder extends PairWiseTestBase {
 
     }
 
-    private static int horizontalExpansion(List<String[]> testSuite, int[][] requirementsArray, Parameter parameter, int parameterIndex, List<IndexedValue> indexedValues, List<Double> cumulativeNumOfCoveredReq, int numberOfCoveredRequirements, int totalNumberOfPairRequirements) {
+    private static int horizontalExpansion(List<String[]> testSuite, int[][] requirementsArray, Parameter parameter, int parameterIndex, int numParamsToExpand, List<IndexedValue> indexedValues, List<Double> cumulativeNumOfCoveredReq, int numberOfCoveredRequirements, int totalNumberOfPairRequirements) {
         // Get parameter values
         List<String> parameterValues = parameter.getValues();
         int testSuiteSize = testSuite.size();
         for (int i = 0; i < testSuiteSize; i++) {
-            String[] bestCoverageTest = getBestCoverageTest(testSuite.get(i), parameterValues, parameterIndex, requirementsArray, indexedValues);
+            String[] bestCoverageTest = getBestCoverageTest(testSuite.get(i), parameterValues, parameterIndex, numParamsToExpand, requirementsArray, indexedValues);
             testSuite.set(i, bestCoverageTest);
 
-            numberOfCoveredRequirements += getNewRequirementCoverageOfTest(Collections.singletonList(bestCoverageTest), parameterIndex + 1, requirementsArray, indexedValues).stream().mapToInt(Integer::intValue).sum();
+            numberOfCoveredRequirements += getNewRequirementCoverageOfTest(Collections.singletonList(bestCoverageTest), numParamsToExpand, requirementsArray, indexedValues).stream().mapToInt(Integer::intValue).sum();
             cumulativeNumOfCoveredReq.add((double)  numberOfCoveredRequirements / totalNumberOfPairRequirements);
             //Update requirements array
-            fillInRequirementsArray(requirementsArray, Collections.singletonList(bestCoverageTest), parameterIndex + 1, indexedValues);
+            fillInRequirementsArray(requirementsArray, Collections.singletonList(bestCoverageTest), numParamsToExpand, indexedValues);
         }
         return numberOfCoveredRequirements;
     }
 
-    private static String[] getBestCoverageTest(String[] test, List<String> parameterValues, int parameterIndex, int[][] requirementsArray, List<IndexedValue> indexedValues) {
+    private static String[] getBestCoverageTest(String[] test, List<String> parameterValues, int parameterIndex, int numParamsToExpand, int[][] requirementsArray, List<IndexedValue> indexedValues) {
         String[] bestTest = new String[0];
         int max = Integer.MIN_VALUE;
         for (String parameterValue : parameterValues) {
@@ -163,7 +172,7 @@ public class InParameterOrder extends PairWiseTestBase {
                 }
             }
 
-            fillInRequirementsArray(reqArrayClone, singleTest, parameterIndex + 1, indexedValues);
+            fillInRequirementsArray(reqArrayClone, singleTest, numParamsToExpand, indexedValues);
 
             int missingReqsAfterAddingTest = 0;
             paramRequirements = reqArrayClone[parameterValueIndex];
