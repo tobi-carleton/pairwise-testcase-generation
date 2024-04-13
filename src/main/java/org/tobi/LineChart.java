@@ -28,7 +28,7 @@ public class LineChart extends ApplicationFrame {
         setContentPane( chartPanel );
     }
 
-    private static XYDataset createDataset(List<Double> x, List<Double> y, String seriesName) {
+    private static XYDataset createDDDataset(List<Double> x, List<Double> y, String seriesName) {
         final XYSeries series = new XYSeries(seriesName);
         int size = x.size();
 
@@ -41,11 +41,81 @@ public class LineChart extends ApplicationFrame {
         return dataset;
     }
 
-    public static void createLineChart(String chartTitle, String seriesName, List<Double> x, List<Double> y, String xLabel, String yLabel) {
-        LineChart chart = new LineChart(chartTitle, createDataset(x, y, seriesName), xLabel, yLabel);
+    private static XYDataset createIIDataset(List<Integer> x, List<Integer> y, String seriesName) {
+        final XYSeries series = new XYSeries(seriesName);
+        int size = x.size();
+
+        for (int i = 0; i < size; i++) {
+            series.add(x.get(i), y.get(i));
+        }
+
+        final XYSeriesCollection dataset = new XYSeriesCollection( );
+        dataset.addSeries(series);
+        return dataset;
+    }
+
+    private static XYDataset createIDDataset(List<Integer> x, List<Double> y, String seriesName) {
+        final XYSeries series = new XYSeries(seriesName);
+        int size = x.size();
+
+        for (int i = 0; i < size; i++) {
+            series.add(x.get(i), y.get(i));
+        }
+
+        final XYSeriesCollection dataset = new XYSeriesCollection( );
+        dataset.addSeries(series);
+        return dataset;
+    }
+
+    /**
+     * Line Chart that expects X and Y values to be of type Double
+     * @param chartTitle
+     * @param seriesName
+     * @param x
+     * @param y
+     * @param xLabel
+     * @param yLabel
+     */
+    public static void createDDLineChart(String chartTitle, String seriesName, List<Double> x, List<Double> y, String xLabel, String yLabel) {
+        LineChart chart = new LineChart(chartTitle, createDDDataset(x, y, seriesName), xLabel, yLabel);
 
         chart.pack( );
         RefineryUtilities.centerFrameOnScreen( chart );
         chart.setVisible( true );
     }
+
+    /**
+     * Line Chart that expects X and Y values to be of type Integer
+     * @param chartTitle
+     * @param seriesName
+     * @param x
+     * @param y
+     * @param xLabel
+     * @param yLabel
+     */
+    public static void createIILineChart(String chartTitle, String seriesName, List<Integer> x, List<Integer> y, String xLabel, String yLabel) {
+        LineChart chart = new LineChart(chartTitle, createIIDataset(x, y, seriesName), xLabel, yLabel);
+
+        chart.pack( );
+        RefineryUtilities.centerFrameOnScreen( chart );
+        chart.setVisible( true );
+    }
+
+    /**
+     * Line Chart that expects X values to be of type Integer and Y values to be of type Double
+     * @param chartTitle
+     * @param seriesName
+     * @param x
+     * @param y
+     * @param xLabel
+     * @param yLabel
+     */
+    public static void createIDLineChart(String chartTitle, String seriesName, List<Integer> x, List<Double> y, String xLabel, String yLabel) {
+        LineChart chart = new LineChart(chartTitle, createIDDataset(x, y, seriesName), xLabel, yLabel);
+
+        chart.pack( );
+        RefineryUtilities.centerFrameOnScreen( chart );
+        chart.setVisible( true );
+    }
+
 }
