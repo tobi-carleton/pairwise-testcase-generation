@@ -8,72 +8,61 @@ public class PairWiseTestBase {
 
     protected static final String DONT_CARE = "DC";
 
-    protected static List<Parameter> getParameterList() {
+    protected static List<Parameter> getParameterList(String parameterListToGet) {
         List<Parameter> parameterList = new ArrayList<>();
 
-//        Parameter noise_Y = new Parameter("noise_Y", List.of("0.0", "1.67", "3.33"));
-//        parameterList.add(noise_Y);
-//
-//        Parameter two_pass = new Parameter("two_pass", List.of("true", "false"));
-//        parameterList.add(two_pass);
-//
-//        Parameter is_track_side_at_left = new Parameter("is_track_side_at_left", List.of("true", "false"));
-//        parameterList.add(is_track_side_at_left);
-//
-//        Parameter noise_X = new Parameter("noise_X", List.of("0.0", "1.67", "3.33"));
-//        parameterList.add(noise_X);
-//
-//
-//        Parameter length = new Parameter("length", List.of("10.0", "40.0", "70.0"));
-//        parameterList.add(length);
-//
-//        Parameter vegetable = new Parameter("vegetable", List.of("cabbage", "leek"));
-//        parameterList.add(vegetable);
-//
-//        Parameter grass_density = new Parameter("grass_density", List.of("0", "1", "2", "3", "4"));
-//        parameterList.add(grass_density);
-//
-//        Parameter is_first_uturn_right_side = new Parameter("is_first_uturn_right_side", List.of("true", "false"));
-//        parameterList.add(is_first_uturn_right_side);
-//
-//        Parameter roughness = new Parameter("roughness", List.of("0.0", "0.33", "0.67"));
-//        parameterList.add(roughness);
-//
-//        Parameter final_track_outer = new Parameter("final_track_outer", List.of("true", "false"));
-//        parameterList.add(final_track_outer);
-//
-//        Parameter weed_area = new Parameter("weed_area", List.of("2.0", "35.0", "68.0"));
-//        parameterList.add(weed_area);
-//
-//        Parameter gap = new Parameter("gap", List.of("55", "91", "127"));
-//        parameterList.add(gap);
-//
-//        Parameter is_first_track_outer = new Parameter("is_first_track_outer", List.of("true", "false"));
-//        parameterList.add(is_first_track_outer);
-//
-//        Parameter vegetable_density = new Parameter("vegetable_density", List.of("1", "2", "3"));
-//        parameterList.add(vegetable_density);
-//
-//        Parameter persistence = new Parameter("persistence", List.of("0.0", "0.23", "0.47"));
-//        parameterList.add(persistence);
-//
-//        Parameter inner_track_width = new Parameter("inner_track_width", List.of("0", "33", "66"));
-//        parameterList.add(inner_track_width);
-//
-//        Parameter row = new Parameter("row", List.of("1.0", "34.0", "67.0"));
-//        parameterList.add(row);
-//
-//        Parameter disappearance_probability = new Parameter("disappearance_probability", List.of("0.0", "10.0", "20.0"));
-//        parameterList.add(disappearance_probability);
+        switch (parameterListToGet) {
+            case "demo":
+                Parameter x = new Parameter("x", List.of("x1", "x2", "x3"));
+                Parameter y = new Parameter("y", List.of("y1", "y2"));
+                Parameter z = new Parameter("z", List.of("z1", "z2", "z3", "z4"));
 
-        Parameter x = new Parameter("x", List.of("x1", "x2", "x3"));
-        Parameter y = new Parameter("y", List.of("y1", "y2"));
-        Parameter z = new Parameter("z", List.of("z1", "z2", "z3", "z4"));
+                parameterList.add(x);
+                parameterList.add(y);
+                parameterList.add(z);
+                break;
+            case "oz":
+                Parameter noise_Y = new Parameter("noise_Y", List.of("0.0", "1.67", "3.33"));
+                Parameter two_pass = new Parameter("two_pass", List.of("true", "false"));
+                Parameter is_track_side_at_left = new Parameter("is_track_side_at_left", List.of("true", "false"));
+                Parameter noise_X = new Parameter("noise_X", List.of("0.0", "1.67", "3.33"));
+                Parameter length = new Parameter("length", List.of("10.0", "40.0", "70.0"));
+                Parameter vegetable = new Parameter("vegetable", List.of("cabbage", "leek"));
+                Parameter grass_density = new Parameter("grass_density", List.of("0", "1", "2", "3", "4"));
+                Parameter is_first_uturn_right_side = new Parameter("is_first_uturn_right_side", List.of("true", "false"));
+                Parameter roughness = new Parameter("roughness", List.of("0.0", "0.33", "0.67"));
+                Parameter final_track_outer = new Parameter("final_track_outer", List.of("true", "false"));
+                Parameter weed_area = new Parameter("weed_area", List.of("2.0", "35.0", "68.0"));
+                Parameter gap = new Parameter("gap", List.of("55", "91", "127"));
+                Parameter is_first_track_outer = new Parameter("is_first_track_outer", List.of("true", "false"));
+                Parameter vegetable_density = new Parameter("vegetable_density", List.of("1", "2", "3"));
+                Parameter persistence = new Parameter("persistence", List.of("0.0", "0.23", "0.47"));
+                Parameter inner_track_width = new Parameter("inner_track_width", List.of("0", "33", "66"));
+                Parameter row = new Parameter("row", List.of("1.0", "34.0", "67.0"));
+                Parameter disappearance_probability = new Parameter("disappearance_probability", List.of("0.0", "10.0", "20.0"));
 
-        parameterList.add(x);
-        parameterList.add(y);
-        parameterList.add(z);
-
+                parameterList.add(noise_Y);
+                parameterList.add(two_pass);
+                parameterList.add(is_track_side_at_left);
+                parameterList.add(noise_X);
+                parameterList.add(length);
+                parameterList.add(vegetable);
+                parameterList.add(grass_density);
+                parameterList.add(is_first_uturn_right_side);
+                parameterList.add(roughness);
+                parameterList.add(final_track_outer);
+                parameterList.add(weed_area);
+                parameterList.add(gap);
+                parameterList.add(is_first_track_outer);
+                parameterList.add(vegetable_density);
+                parameterList.add(persistence);
+                parameterList.add(inner_track_width);
+                parameterList.add(row);
+                parameterList.add(disappearance_probability);
+                break;
+            default:
+                throw new RuntimeException("Select valid option of either 'demo' or 'oz'");
+        }
         return parameterList;
     }
 
@@ -119,7 +108,7 @@ public class PairWiseTestBase {
                     pairRequirement[1] = test[j];
                     parameterIndex[0] = i;
                     parameterIndex[1] = j;
-                    if (!(pairRequirement[0].equalsIgnoreCase(DONT_CARE) || pairRequirement[1].equalsIgnoreCase(DONT_CARE))) {
+                    if (!(pairRequirement[0] == null || pairRequirement[1] == null || pairRequirement[0].equalsIgnoreCase(DONT_CARE) || pairRequirement[1].equalsIgnoreCase(DONT_CARE))) {
                         coveredRequirements.add(pairRequirement);
                         parameterIndexes.add(parameterIndex);
                     }
@@ -205,6 +194,38 @@ public class PairWiseTestBase {
         }
 
         return totalNumOfPairRequirements;
+    }
+
+    protected static int numberOfNewlyCoveredRequirements(int[][] requirementsArray, String[] test, int noOfParameters, List<IndexedValue> indexedValues) {
+        int numOfNewlyCoveredRequirements = 0;
+        List<String[]> coveredRequirements = new ArrayList<>();
+        List<int[]> parameterIndexes = new ArrayList<>();
+        for (int i = 0; i < noOfParameters - 1; i++) {
+            for (int j = i + 1; j < noOfParameters; j++) {
+                String[] pairRequirement = new String[2];
+                int[] parameterIndex = new int[2];
+                pairRequirement[0] = test[i];
+                pairRequirement[1] = test[j];
+                parameterIndex[0] = i;
+                parameterIndex[1] = j;
+                if (!(pairRequirement[0] == null || pairRequirement[1] == null || pairRequirement[0].equalsIgnoreCase(DONT_CARE) || pairRequirement[1].equalsIgnoreCase(DONT_CARE))) {
+                    coveredRequirements.add(pairRequirement);
+                    parameterIndexes.add(parameterIndex);
+                }
+            }
+        }
+
+        int coveredRequirementsSize = coveredRequirements.size();
+        for (int i = 0; i < coveredRequirementsSize; i++) {
+            int firstParamIndex = getIndexFromParameterValue(indexedValues, coveredRequirements.get(i)[0], parameterIndexes.get(i)[0]);
+            int secondParamIndex = getIndexFromParameterValue(indexedValues, coveredRequirements.get(i)[1], parameterIndexes.get(i)[1]);
+
+            if (requirementsArray[firstParamIndex][secondParamIndex] == 0 && requirementsArray[secondParamIndex][firstParamIndex] == 0) {
+                numOfNewlyCoveredRequirements++;
+            }
+        }
+
+        return numOfNewlyCoveredRequirements;
     }
 
 }

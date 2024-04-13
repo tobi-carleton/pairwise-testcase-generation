@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class RandomGreedyAlgorithm extends PairWiseTestBase {
 
     public static void main(String[] args) {
         long startTime = System.currentTimeMillis();
-        List<Parameter> parameterList = getParameterList();
+        List<Parameter> parameterList = getParameterList("oz");
         int totalNumberOfPairRequirements = getTotalNumberOfPairRequirements(parameterList);
         int numberOfCoveredRequirements = 0;
         int numOfIterations = 0;
@@ -19,7 +21,7 @@ public class RandomGreedyAlgorithm extends PairWiseTestBase {
         List<String[]> testSuite = new ArrayList<>();
 
         // Will be used for plotting incremental increase of pairwise coverage later on
-        List<Integer> numOfCoveredReqs = new ArrayList<>();
+        List<Double> cumulativeNumOfCoveredReq = new ArrayList<>();
 
         int kTrials = 3;
         while (numOfIterations < 1000 && numberOfCoveredRequirements < totalNumberOfPairRequirements) {
@@ -28,8 +30,8 @@ public class RandomGreedyAlgorithm extends PairWiseTestBase {
 
             if (highestCoverageTest.getNumOfCoveredReq() > 0) {
                 testSuite.add(highestCoverageTest.getTest());
-                numOfCoveredReqs.add(highestCoverageTest.getNumOfCoveredReq());
                 numberOfCoveredRequirements += highestCoverageTest.getNumOfCoveredReq();
+                cumulativeNumOfCoveredReq.add((double) numberOfCoveredRequirements / totalNumberOfPairRequirements);
 
                 // Update requirements array
                 fillInRequirementsArray(requirementsArray, Collections.singletonList(highestCoverageTest.getTest()), parameterListSize, indexedValues);
@@ -41,6 +43,8 @@ public class RandomGreedyAlgorithm extends PairWiseTestBase {
         System.out.println("Number of iterations = " + numOfIterations);
         System.out.println("Percentage of covered requirements = " + ((double) numberOfCoveredRequirements / totalNumberOfPairRequirements) * 100 + "%");
         System.out.println("Test Suite Size = " + testSuite.size());
+        List<Integer> xValues = IntStream.range(1, testSuite.size() + 1).boxed().collect(Collectors.toList());
+        LineChart.createIDLineChart("Covered Requirements vs. Test Suite Size", "Random Greedy - 3 Trials", xValues, cumulativeNumOfCoveredReq, "Test Suite Size", "Number of covered pair requirements");
     }
 
     private static List<String[]> createKRandomTestCases(List<Parameter> parameterList, int parameterListSize, int kTrials) {
@@ -77,35 +81,5 @@ public class RandomGreedyAlgorithm extends PairWiseTestBase {
         }
 
         return new TestAndNumOfCoveredReq(bestTest, max);
-    }
-
-    private static int numberOfNewlyCoveredRequirements(int[][] requirementsArray, String[] test, int noOfParameters, List<IndexedValue> indexedValues) {
-        int numOfNewlyCoveredRequirements = 0;
-        List<String[]> coveredRequirements = new ArrayList<>();
-        List<int[]> parameterIndexes = new ArrayList<>();
-        for (int i = 0; i < noOfParameters - 1; i++) {
-            for (int j = i + 1; j < noOfParameters; j++) {
-                String[] pairRequirement = new String[2];
-                int[] parameterIndex = new int[2];
-                pairRequirement[0] = test[i];
-                pairRequirement[1] = test[j];
-                parameterIndex[0] = i;
-                parameterIndex[1] = j;
-                coveredRequirements.add(pairRequirement);
-                parameterIndexes.add(parameterIndex);
-            }
-        }
-
-        int coveredRequirementsSize = coveredRequirements.size();
-        for (int i = 0; i < coveredRequirementsSize; i++) {
-            int firstParamIndex = getIndexFromParameterValue(indexedValues, coveredRequirements.get(i)[0], parameterIndexes.get(i)[0]);
-            int secondParamIndex = getIndexFromParameterValue(indexedValues, coveredRequirements.get(i)[1], parameterIndexes.get(i)[1]);
-
-            if (requirementsArray[firstParamIndex][secondParamIndex] == 0 && requirementsArray[secondParamIndex][firstParamIndex] == 0) {
-                numOfNewlyCoveredRequirements++;
-            }
-        }
-
-        return numOfNewlyCoveredRequirements;
     }
 }
