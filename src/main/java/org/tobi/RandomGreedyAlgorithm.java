@@ -44,7 +44,6 @@ public class RandomGreedyAlgorithm extends PairWiseTestBase {
             if (highestCoverageTest.getNumOfCoveredReq() > 0) {
                 testSuite.add(highestCoverageTest.getTest());
                 numberOfCoveredRequirements += highestCoverageTest.getNumOfCoveredReq();
-                cumulativeNumOfCoveredReq.add((double) numberOfCoveredRequirements / totalNumberOfPairRequirements);
                 numOfIterationsWithNoNewRequirementsCovered = 0;
 
                 // Update requirements array
@@ -52,6 +51,7 @@ public class RandomGreedyAlgorithm extends PairWiseTestBase {
             } else {
                 numOfIterationsWithNoNewRequirementsCovered++;
             }
+            cumulativeNumOfCoveredReq.add((double) numberOfCoveredRequirements / totalNumberOfPairRequirements);
             numOfIterations++;
         }
         printTestSuite(testSuite);
@@ -64,8 +64,8 @@ public class RandomGreedyAlgorithm extends PairWiseTestBase {
         System.out.println("Test Suite Size = " + testSuite.size());
         System.out.println("Number of iterations taken is " + numOfIterations + " out of maximum allowed of " + maxNumOfIterations);
         System.out.println("Percentage of covered requirements = " + ((double) numberOfCoveredRequirements / totalNumberOfPairRequirements) * 100 + "%");
-        List<Integer> xValues = IntStream.range(1, testSuite.size() + 1).boxed().collect(Collectors.toList());
-        LineChart.createIDLineChart("Covered Requirements vs. Test Suite Size", "Random Greedy - " + kTrials + " Trials", xValues, cumulativeNumOfCoveredReq, "Test Suite Size", "Number of covered pair requirements");
+        List<Integer> xValues = IntStream.range(1, numOfIterations + 1).boxed().collect(Collectors.toList());
+        LineChart.createIDLineChart("Covered Requirements vs. Number of Iterations", "Random Guided Greedy - " + kTrials + " Trials", xValues, cumulativeNumOfCoveredReq, "Number of Iterations", "Percentage of Covered Pair Requirements");
     }
 
     private static List<String[]> createKRandomTestCases(List<Parameter> parameterList, int parameterListSize, int kTrials) {
