@@ -30,8 +30,8 @@ public class RandomGreedyAlgorithm extends PairWiseTestBase {
         while (numOfIterations < maxNumOfIterations && numberOfCoveredRequirements < totalNumberOfPairRequirements) {
             List<String[]> kRandomTestCases;
             TestAndNumOfCoveredReq highestCoverageTest;
-            if (numOfIterationsWithNoNewRequirementsCovered > 2) {
-                // If random approach does not increase coverage after 3 iterations, constrain random test case generation to create test case that covers a missing pair requirement
+            if (numOfIterationsWithNoNewRequirementsCovered > 1) {
+                // If random approach does not increase coverage after 2 iterations, constrain random test case generation to create test case that covers a missing pair requirement
                 int[] indexesOfFirstUncoveredRequirement = getIndexesOfFirstUncoveredRequirement(requirementsArray, parameterValuesListSize);
                 IndexedValue rowParameter = getParameterFromValueIndex(indexedValues, indexesOfFirstUncoveredRequirement[0]);
                 IndexedValue columnParameter = getParameterFromValueIndex(indexedValues, indexesOfFirstUncoveredRequirement[1]);
