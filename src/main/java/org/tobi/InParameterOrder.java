@@ -42,7 +42,7 @@ public class InParameterOrder extends PairWiseTestBase {
         System.out.println("Number of horizontal/vertical expansion steps = " + cumulativeNumOfCoveredReq.size());
         System.out.println("Percentage of covered requirements = " + ((double) numberOfCoveredRequirements / totalNumberOfPairRequirements) * 100 + "%");
         List<Integer> xValues = IntStream.range(1, cumulativeNumOfCoveredReq.size() + 1).boxed().collect(Collectors.toList());
-        LineChart.createIDLineChart("Covered Requirements vs. Number of horizontal/vertical expansion steps", "In Parameter Order", xValues, cumulativeNumOfCoveredReq, "Horizontal/Vertical Expansion Steps", "Number of covered pair requirements");
+        LineChart.createIDLineChart("Covered Requirements vs. Number of Test Suite Expansions", "In Parameter Order", xValues, cumulativeNumOfCoveredReq, "Number of Test Suite Expansions", "Percentage of Covered Pair Requirements");
     }
 
     private static List<Integer> getNewRequirementCoverageOfTest(List<String[]> kTests, int numParamsToExpand, int[][] requirementsArray, List<IndexedValue> indexedValues) {
