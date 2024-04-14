@@ -149,6 +149,13 @@ public class PairWiseTestBase {
         return filteredIndexValue.getIndex();
     }
 
+    protected static IndexedValue getParameterFromValueIndex(List<IndexedValue> indexedValues, int parameterValueIndex) {
+        return indexedValues.stream()
+                .filter(indexedValue -> indexedValue.getIndex() == parameterValueIndex)
+                .findFirst()
+                .orElseThrow(NullPointerException::new);
+    }
+
     protected static String getParameterValueFromIndex(List<IndexedValue> indexedValues, int parameterIndex) {
         IndexedValue filteredIndexValue = indexedValues.stream()
                 .filter(indexedValue -> indexedValue.getIndex() == parameterIndex)
